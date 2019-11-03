@@ -4,8 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
-import java.io.IOException;
-
 public class MapController {
 
     @FXML

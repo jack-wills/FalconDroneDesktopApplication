@@ -2,20 +2,16 @@ package org.falcon.app;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.VBox;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * JavaFX App
@@ -23,12 +19,25 @@ import java.io.IOException;
 public class App extends Application {
 
     private static Scene scene;
+    private static BlockingQueue serialPassThroughQueue;
+    private static BlockingQueue networkSendQueue;
+    private static BlockingQueue networkReceiveQueue;
 
     @Override
     public void start(Stage stage) throws IOException {
-        Parent attitude = loadFXML("attitude");
-        Parent console = loadFXML("console");
-        Parent secondary = loadFXML("secondary");
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("attitude.fxml"));
+        Parent attitude = fxmlLoader.load();
+        AttitudeController attitudeController = fxmlLoader.getController();
+
+        fxmlLoader = new FXMLLoader(App.class.getResource("console.fxml"));
+        Parent console = fxmlLoader.load();
+        ConsoleController consoleController = fxmlLoader.getController();
+        consoleController.setQueue(networkReceiveQueue);
+
+        fxmlLoader = new FXMLLoader(App.class.getResource("secondary.fxml"));
+        Parent secondary = fxmlLoader.load();
+        SecondaryController secondaryController = fxmlLoader.getController();
+        secondaryController.setQueue(networkSendQueue);
         Parent map = loadFXML("map");
         GridPane root = new GridPane();
 
@@ -72,6 +81,22 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
+        serialPassThroughQueue = new ArrayBlockingQueue(1024);
+        networkSendQueue = new ArrayBlockingQueue(1024);
+        networkReceiveQueue = new ArrayBlockingQueue(1024);
+
+        NetworkController networkThread = new NetworkController(networkSendQueue);
+        networkThread.setDaemon(true);
+        networkThread.start();
+
+        SerialPassThroughNetworkController serialPassThroughNetworkControllerThread = new SerialPassThroughNetworkController(serialPassThroughQueue);
+        serialPassThroughNetworkControllerThread.setDaemon(true);
+        serialPassThroughNetworkControllerThread.start();
+
+        Server serverThread = new Server(networkReceiveQueue);
+        serverThread.setDaemon(true);
+        serverThread.start();
+
         launch();
     }
 
