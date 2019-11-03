@@ -11,6 +11,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -27,20 +29,21 @@ public class App extends Application {
         Parent attitude = loadFXML("attitude");
         Parent console = loadFXML("console");
         Parent secondary = loadFXML("secondary");
+        Parent map = loadFXML("map");
         GridPane root = new GridPane();
 
         RowConstraints rcons1 = new RowConstraints();
-        rcons1.setVgrow(Priority.ALWAYS);
+        rcons1.setPercentHeight(50);
 
         RowConstraints rcons2 = new RowConstraints();
-        rcons2.setVgrow(Priority.ALWAYS);
+        rcons2.setPercentHeight(50);
 
 
         ColumnConstraints cons1 = new ColumnConstraints();
-        cons1.setHgrow(Priority.ALWAYS);
+        cons1.setPercentWidth(50);
 
         ColumnConstraints cons2 = new ColumnConstraints();
-        cons2.setHgrow(Priority.ALWAYS);
+        cons2.setPercentWidth(50);
 
         root.getColumnConstraints().addAll(cons1, cons2);
 
@@ -49,6 +52,7 @@ public class App extends Application {
         root.add(attitude, 0, 0);
         root.add(console, 1, 0);
         root.add(secondary, 0, 1);
+        root.add(map, 1, 1);
 
         scene = new Scene(root);
 
@@ -56,6 +60,8 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setHeight(700);
         stage.setWidth(1100);
+        stage.setMinWidth(400);
+        stage.setMinHeight(300);
         stage.setTitle("Falcon Control");
         stage.show();
     }
